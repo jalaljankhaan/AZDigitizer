@@ -1,3 +1,4 @@
+import org.bouncycastle.cms.RecipientId.password
 import java.util.Properties
 
 plugins {
@@ -80,6 +81,7 @@ afterEvaluate {
 
     // **Enable GPG signing for all publications**
     signing {
+//        useGpgCmd()
         useInMemoryPgpKeys(signingKeyId, signingSecretKeyRingFile, signingPassword)
         sign(publishing.publications)
     }
