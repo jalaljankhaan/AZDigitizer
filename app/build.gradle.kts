@@ -77,10 +77,18 @@ dependencies {
 }
 
 afterEvaluate {
+
+    // **Enable GPG signing for all publications**
+    signing {
+        useInMemoryPgpKeys(signingKeyId, signingSecretKeyRingFile, signingPassword)
+        sign(publishing.publications)
+    }
+
     publishing {
         publications {
             create<MavenPublication>("aar") {
                 from(components["release"])
+
                 groupId = "com.jalaljankhan"
                 artifactId = "azdigitizer"
                 version = "1.0"
@@ -128,10 +136,5 @@ afterEvaluate {
                 }
             }
         }
-    }
-
-    // **Enable GPG signing for all publications**
-    signing {
-        sign(publishing.publications)
     }
 }
