@@ -1,12 +1,24 @@
-import com.vanniktech.maven.publish.SonatypeHost
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.maven.publish)
     alias(libs.plugins.signing)
-    alias(libs.plugins.vanniktech.maven.publish)
 }
+
+val localProperties = Properties()
+localProperties.load(project.rootProject.file("local.properties").inputStream())
+
+val sonatypeUsername: String = localProperties.getProperty("sonatypeUsername")
+val sonatypePassword: String = localProperties.getProperty("sonatypePassword")
+val sonatypeMavenCentralUrl: String = localProperties.getProperty("sonatypeMavenCentralUrl")
+
+val signingKeyId: String = localProperties.getProperty("signing.keyId")
+val signingPassword: String = localProperties.getProperty("signing.password")
+val signingSecretKeyRingFile: String = localProperties.getProperty("signing.secretKeyRingFile")
+
+val projectRepository: String = localProperties.getProperty("projectRepository")
 
 android {
     namespace = "com.jalaljankhan.azdigitizer"
@@ -44,6 +56,15 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = signingKeyId
+            keyPassword = signingPassword
+            storeFile = file(signingSecretKeyRingFile)
+            storePassword = signingPassword
+        }
+    }
 }
 
 dependencies {
@@ -67,7 +88,7 @@ afterEvaluate {
                 pom {
                     name.set("AZDigitizer")
                     description.set("AZDigitizer is a simple library developed in kotlin to help the developers to draw different patterns on their android devices to test the screen touch.")
-                    url.set("https://github.com/jalaljankhaan/AZDigitizer")
+                    url.set(projectRepository)
                     inceptionYear.set("2024")
 
                     // Set License
@@ -89,63 +110,7 @@ afterEvaluate {
 
                     // Specify SCM
                     scm {
-                        url.set("https://github.com/jalaljankhaan/AZDigitizer")
-                    }
-                }
-            }
-        }
-
-        // Repository
-        repositories {
-            maven {
-                name = "Sonatype"
-                url = uri("")
-            }
-        }
-    }
-
-    // Configure publishing to Maven Central
-    //publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-
-    // Enable GPG signing for all publications
-    //signAllPublications()
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("aar") {
-                from(components["release"])
-                groupId = "com.jalaljankhan"
-                artifactId = "azdigitizer"
-                version = "1.0"
-
-                pom {
-                    name.set("AZDigitizer")
-                    description.set("AZDigitizer is a simple library developed in kotlin to help the developers to draw different patterns on their android devices to test the screen touch.")
-                    url.set("https://github.com/jalaljankhaan/AZDigitizer")
-                    inceptionYear.set("2024")
-
-                    // Set License
-                    licenses {
-                        license {
-                            name.set("The MIT License")
-                            url.set("https://opensource.org/licenses/MIT")
-                        }
-                    }
-
-                    // Developer's Information
-                    developers {
-                        developer {
-                            id.set("jalaljankhaan")
-                            name.set("Jalal Jan Khan")
-                            email.set("jalaljankhan@outlook.com")
-                        }
-                    }
-
-                    // Specify SCM
-                    scm {
-                        url.set("https://github.com/jalaljankhaan/AZDigitizer")
+                        url.set(projectRepository)
                     }
                 }
             }
@@ -155,11 +120,11 @@ afterEvaluate {
         repositories {
             maven {
                 // Update URL based on your Sonatype environment (staging or release)
-                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                url = uri(sonatypeMavenCentralUrl)
 
                 credentials {
-                    username = project.findProperty("sonatypeUsername") as String
-                    password = project.findProperty("sonatypePassword") as String
+                    username = sonatypeUsername
+                    password = sonatypePassword
                 }
             }
         }
